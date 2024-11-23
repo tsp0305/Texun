@@ -22,7 +22,7 @@ export default function FooterCom() {
                   letterSpacing: '0.1rem',
                 }}
               >
-                TEX<span style={{ marginLeft: '0.25rem' }}></span>UN
+                TEX<span style={{ marginLeft: '0.25rem' }}></span>CON
               </span>
             </Link>
           </div>
@@ -38,7 +38,7 @@ export default function FooterCom() {
                   rel="noopener noreferrer"
                   className="text-sm"
                 >
-                  Sahand's Blog
+                  TEXCON Blog
                 </Footer.Link>
               </Footer.LinkGroup>
             </div>

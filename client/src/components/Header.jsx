@@ -63,7 +63,7 @@ export default function Header() {
             WebkitBackgroundClip: 'text', 
             letterSpacing: '0.1rem' // Slight spacing between letters
         }}>
-          TEX<span style={{ marginLeft: '0.25rem' }}></span>UN
+          TEX<span style={{ marginLeft: '0.25rem' }}></span>CON
         </span>
       </Link>
       <form onSubmit={handleSubmit}>
