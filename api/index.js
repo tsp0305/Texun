@@ -11,7 +11,7 @@ import path from 'path';
 dotenv.config();
 
 mongoose
-  .connect('mongodb+srv://tspriya0305:priya@texun.pcuyc.mongodb.net/texun?retryWrites=true&w=majority&appName=texun')
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log('MongoDb is connected');
   })
