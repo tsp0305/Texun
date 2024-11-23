@@ -60,7 +60,7 @@ export default function SignIn() {
             WebkitBackgroundClip: 'text', 
             letterSpacing: '0.1rem' // Slight spacing between letters
         }}>
-          TEX<span style={{ marginLeft: '0.25rem' }}></span>CON
+          TEX<span style={{ marginLeft: '0.25rem' }}></span>UN
         </span>
       </Link>
           <p className='text-sm mt-5'>

@@ -8,7 +8,7 @@ export default function About() {
           </h1>
           <div className='text-md text-gray-500 flex flex-col gap-6'>
             <p>
-              Welcome to Texcon Blog! 
+              Welcome to TEXUN Blog! 
             </p>
 
             <p>
