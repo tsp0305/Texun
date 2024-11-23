@@ -50,14 +50,21 @@ export default function Header() {
 
   return (
     <Navbar className='border-b-2'>
-      <Link
-        to='/'
-        className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white'
-      >
-        <span className='px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white'>
-          Sahand's
+      <Link to="/" style={{ position: 'relative', display: 'inline-block' }}>
+        {/* Infinity Symbol Behind with Gradient */}
+        
+        
+        {/* "Texun" Text with Gradient and Slight Gap */}
+        <span style={{
+            fontWeight: 'bold', 
+            fontSize: '2rem', 
+            color: 'transparent', 
+            background: 'linear-gradient(to right, #2c3e50, #2980b9)', // Gradient from dark to light blue
+            WebkitBackgroundClip: 'text', 
+            letterSpacing: '0.1rem' // Slight spacing between letters
+        }}>
+          TEX<span style={{ marginLeft: '0.25rem' }}></span>UN
         </span>
-        Blog
       </Link>
       <form onSubmit={handleSubmit}>
         <TextInput
