@@ -20,10 +20,27 @@ const postSchema = new mongoose.Schema(
       default:
         'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png',
     },
-    category: {
+    product: {
       type: String,
       default: 'uncategorized',
     },
+    category : {
+      type : String,
+      default : 'not applicable'
+    },
+    subCategory : {
+      type : String,
+      defaut : 'not applicable'
+    },
+    department : {
+      type : String,
+      default : 'not applicable'
+     },
+
+     articleType : {
+        type : String,
+        default : 'others'
+     },
     slug: {
       type: String,
       required: true,
