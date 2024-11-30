@@ -33,17 +33,18 @@ export default function CreatePost() {
     },
     'Yarn Manufacturing': {
       types: {
-        'Ring Spinning': ['Short Staple', 'Long Staple'],
-        'Open End Spinning': ['Rotor Spinning', 'Friction Spinning'],
-        'Air Jet Spinning': ['Blow Room', 'Carding'],
-         'Accessories' : [],
-      },
+        'Ring Spinning': ['Mixing', 'Blowroom','Carding' , 'Breaker Drawframe','Lapformer','Comber','Finisher Drawframe','Speedframe','Ringframe','Autoconer'],
+        'Open End Spinning': ['Mixing', 'Blowroom','Carding','Finisher Drawframe'],
+        'Air Jet Spinning': ['Mixing','Blowroom','Carding','Finisher Drawframe'],
+         'Accessories' : ['Wire clothing','Cots','Apron','Rings & Traveller','Bobbin transport','OHTC','Yarn clearers','WCS Plant','Humidifcation plant','Compressor','Yarn conditioning'],
+         'costing' : ['Yarn realisation' , 'Count conversion costing','Store cosumption costing'],
+        },
     },
     'Fabric Manufacturing': {
       types: {
-        Knitting: ['Weft Knitting', 'Warp Knitting'],
-        Weaving: ['Plain Weave', 'Twill Weave', 'Satin Weave'],
-        Garmenting: ['Cutting', 'Sewing'],
+        Knitting: [],
+        Weaving: ['Warping', 'Sizing', 'Looms'],
+        Garmenting: ['Scouring', 'Finishing','Cutting','Sewing'],
       },
     },
   };
@@ -140,9 +141,9 @@ export default function CreatePost() {
         {/* Suboption of Subcategory Dropdown */}
         {selectedSubCategory && (
           <Select
-            onChange={(e) => handleInputChange('subCategory', e.target.value)}
+            onChange={(e) => handleInputChange('department', e.target.value)}
           >
-            <option value="">Select Suboption</option>
+            <option value="">Select</option>
             {product[selectedCategory].types[selectedSubCategory].map(
               (suboption) => (
                 <option key={suboption} value={suboption}>

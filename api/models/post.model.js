@@ -28,10 +28,7 @@ const postSchema = new mongoose.Schema(
       type : String,
       default : 'not applicable'
     },
-    subCategory : {
-      type : String,
-      defaut : 'not applicable'
-    },
+  
     department : {
       type : String,
       default : 'not applicable'
