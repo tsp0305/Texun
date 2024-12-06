@@ -1,0 +1,39 @@
+/* darkMode.css */
+
+/* General dark mode styling */
+.react-quill {
+  background-color: #333; /* Dark background */
+  color: #fff; /* Light text */
+}
+
+.react-quill .ql-editor {
+  background-color: #333 !important; /* Dark background for editor */
+  color: #fff; /* Light text for editor */
+}
+
+.react-quill .ql-toolbar {
+  background-color: #444; /* Dark toolbar background */
+  border-color: #666; /* Lighter border for the toolbar */
+}
+
+.react-quill .ql-toolbar .ql-picker-item {
+  color: #fff; /* Light text for toolbar items */
+}
+
+.react-quill .ql-toolbar .ql-picker-label {
+  color: #bbb; /* Lighter text for picker labels */
+}
+
+.react-quill .ql-snow .ql-tooltip {
+  background-color: #444 !important; /* Tooltip background for dark mode */
+  color: #fff !important; /* Tooltip text */
+}
+
+.react-quill .ql-snow .ql-picker-item.ql-selected {
+  background-color: #666 !important; /* Highlight selected item */
+}
+
+/* Style for the cursor in dark mode */
+.react-quill .ql-editor .ql-cursor {
+  border-left: 2px solid #fff; /* Light cursor */
+}

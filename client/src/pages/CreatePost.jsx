@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
-import {
-  Alert,
-  Button,
-  FileInput,
-  Select,
-  TextInput,
-} from 'flowbite-react';
+import { Alert, Button, FileInput, Select, TextInput } from 'flowbite-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { CircularProgressbar } from 'react-circular-progressbar';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import { Cloudinary } from '@cloudinary/url-gen';
 import 'react-circular-progressbar/dist/styles.css';
 import { useNavigate } from 'react-router-dom';
+import './darkMode.css'; // Import the custom dark mode styles
 
 export default function CreatePost() {
+  const cld = new Cloudinary({ cloud: { cloudName: 'dqnuqzbyk' } });
   const [file, setFile] = useState(null);
-  const [imageUploadProgress, setImageUploadProgress] = useState(null);
+  const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const [imageUploadError, setImageUploadError] = useState(null);
+  const [imageFileUrl, setImageFileUrl] = useState('');
   const [formData, setFormData] = useState({});
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [publishError, setPublishError] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false); // State for toggling dark mode
 
   const navigate = useNavigate();
 
-  // Product data with suboptions for suboptions
   const product = {
     'Fibre Manufacturing': {
       types: {
@@ -33,18 +31,41 @@ export default function CreatePost() {
     },
     'Yarn Manufacturing': {
       types: {
-        'Ring Spinning': ['Mixing', 'Blowroom','Carding' , 'Breaker Drawframe','Lapformer','Comber','Finisher Drawframe','Speedframe','Ringframe','Autoconer'],
-        'Open End Spinning': ['Mixing', 'Blowroom','Carding','Finisher Drawframe'],
-        'Air Jet Spinning': ['Mixing','Blowroom','Carding','Finisher Drawframe'],
-         'Accessories' : ['Wire clothing','Cots','Apron','Rings & Traveller','Bobbin transport','OHTC','Yarn clearers','WCS Plant','Humidifcation plant','Compressor','Yarn conditioning'],
-         'costing' : ['Yarn realisation' , 'Count conversion costing','Store cosumption costing'],
-        },
+        'Ring Spinning': [
+          'Mixing',
+          'Blowroom',
+          'Carding',
+          'Breaker Drawframe',
+          'Lapformer',
+          'Comber',
+          'Finisher Drawframe',
+          'Speedframe',
+          'Ringframe',
+          'Autoconer',
+        ],
+        'Open End Spinning': ['Mixing', 'Blowroom', 'Carding', 'Finisher Drawframe'],
+        'Air Jet Spinning': ['Mixing', 'Blowroom', 'Carding', 'Finisher Drawframe'],
+        Accessories: [
+          'Wire clothing',
+          'Cots',
+          'Apron',
+          'Rings & Traveller',
+          'Bobbin transport',
+          'OHTC',
+          'Yarn clearers',
+          'WCS Plant',
+          'Humidification plant',
+          'Compressor',
+          'Yarn conditioning',
+        ],
+        costing: ['Yarn realization', 'Count conversion costing', 'Store consumption costing'],
+      },
     },
     'Fabric Manufacturing': {
       types: {
         Knitting: [],
         Weaving: ['Warping', 'Sizing', 'Looms'],
-        Garmenting: ['Scouring', 'Finishing','Cutting','Sewing'],
+        Garmenting: ['Scouring', 'Finishing', 'Cutting', 'Sewing'],
       },
     },
   };
@@ -52,35 +73,92 @@ export default function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.title || !formData.content || !imageFileUrl) {
+      console.warn('Validation failed:', formData);
+      setPublishError('Please fill all required fields.');
+      return;
+    }
+
+    // Ensure imageUrl is part of the formData before submission
+    const formWithImageUrl = { ...formData, image: imageFileUrl };
+
+    console.log('Form data before submission:', formWithImageUrl);
+    console.log('Complete form data:', { ...formData, imageUrl: imageFileUrl });
+
     try {
-      const res = await fetch('/api/post/create', {
+      const res = await fetch('http://localhost:5173/api/post/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formWithImageUrl),
       });
       const data = await res.json();
 
+      console.log('Response:', data);
+
       if (!res.ok) {
-        setPublishError(data.message);
+        setPublishError(data.message || 'Failed to publish post.');
         return;
       }
 
       setPublishError(null);
       navigate(`/post/${data.slug}`);
     } catch (error) {
+      console.error('Error during form submission:', error);
       setPublishError('Something went wrong.');
     }
   };
 
-  // General handler for state updates
+  const uploadImageToCloudinary = async () => {
+    if (!file) {
+      console.error('No file selected for upload.');
+      setImageUploadError('Please select an image to upload.');
+      return;
+    }
+
+    console.log('Uploading file:', file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'nj8ouwoc');
+    formData.append('cloudname', 'dqnuqzbyk');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.cloudinary.com/v1_1/dqnuqzbyk/image/upload', true);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        setImageUploadProgress(progress);
+      }
+    };
+
+    xhr.onload = async () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        console.log('Cloudinary Response:', data);
+        setImageFileUrl(data.secure_url);
+        setFormData((prev) => ({ ...prev, image: data.secure_url }));
+        setImageUploadError(null);
+      } else {
+        setImageUploadError('Failed to upload image.');
+      }
+    };
+
+    xhr.onerror = () => {
+      setImageUploadError('An error occurred while uploading the image.');
+    };
+
+    xhr.send(formData);
+  };
+
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
 
   return (
-    <div className="p-3 max-w-3xl mx-auto min-h-screen">
+    <div className={`p-3 max-w-3xl mx-auto min-h-screen ${isDarkMode ? 'dark' : ''}`}>
       <h1 className="text-center text-3xl my-7 font-semibold">Create a Post</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {/* Title Input */}
@@ -90,26 +168,24 @@ export default function CreatePost() {
           required
           onChange={(e) => handleInputChange('title', e.target.value)}
         />
-           <Select
-            onChange={(e) =>
-              setFormData({ ...formData, articleType: e.target.value })
-            }
-          >
-            <option value='Others'>Select Article Type</option>
-            <option value='Machines'>Machines</option>
-            <option value='MOP'>MOP</option>
-            <option value='Manual'>Manual</option>
-            <option value='Formulas'>Formulas</option>
-         
-          </Select>
+        <Select
+          onChange={(e) => setFormData({ ...formData, articleType: e.target.value })}
+        >
+          <option value="Others">Select Article Type</option>
+          <option value="Machines">Machines</option>
+          <option value="MOP">MOP</option>
+          <option value="Manual">Manual</option>
+          <option value="Formulas">Formulas</option>
+        </Select>
 
         {/* Product Dropdown */}
         <Select
           onChange={(e) => {
             const value = e.target.value;
+            console.log('Selected Category:', value);
             setSelectedCategory(value);
             handleInputChange('product', value);
-            setSelectedSubCategory(''); // Reset subcategory when product changes
+            setSelectedSubCategory('');
           }}
         >
           <option value="">Select Product</option>
@@ -125,67 +201,61 @@ export default function CreatePost() {
           <Select
             onChange={(e) => {
               const value = e.target.value;
+              console.log('Selected Subcategory:', value);
               setSelectedSubCategory(value);
-              handleInputChange('category', value);
             }}
           >
-            <option value="">Select Product Category</option>
-            {Object.keys(product[selectedCategory].types).map((subcategory) => (
-              <option key={subcategory} value={subcategory}>
-                {subcategory}
+            <option value="">Select Subcategory</option>
+            {product[selectedCategory]?.types[Object.keys(product[selectedCategory].types)[0]].map((subCategory) => (
+              <option key={subCategory} value={subCategory}>
+                {subCategory}
               </option>
             ))}
           </Select>
         )}
 
-        {/* Suboption of Subcategory Dropdown */}
-        {selectedSubCategory && (
-          <Select
-            onChange={(e) => handleInputChange('department', e.target.value)}
-          >
-            <option value="">Select</option>
-            {product[selectedCategory].types[selectedSubCategory].map(
-              (suboption) => (
-                <option key={suboption} value={suboption}>
-                  {suboption}
-                </option>
-              )
-            )}
-          </Select>
-        )}
-
-        {/* Image Upload */}
-        <div className="flex gap-4 items-center justify-between border-4 border-teal-500 border-dotted p-3">
-          <FileInput
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
-          <Button type="button" size="sm" onClick={() => {}}>
-            Upload Image
-          </Button>
-        </div>
-        {imageUploadError && <Alert color="failure">{imageUploadError}</Alert>}
-
-        {/* Rich Text Editor */}
+        {/* ReactQuill Editor */}
         <ReactQuill
-          theme="snow"
-          placeholder="Write something..."
-          required
+          value={formData.content || ''}
           onChange={(value) => handleInputChange('content', value)}
+          className="mb-3"
         />
 
-        {/* Submit Button */}
-        <Button type="submit" gradientDuoTone="purpleToPink">
-          Publish
-        </Button>
+        {/* File Upload */}
+        <div className="relative">
+          <FileInput
+            id="fileInput"
+            required
+            onChange={(e) => {
+              setFile(e.target.files[0]);
+            }}
+          />
+          <Button
+            onClick={uploadImageToCloudinary}
+            disabled={imageUploadProgress > 0 && imageUploadProgress < 100}
+          >
+            Upload Image
+          </Button>
+          {imageUploadProgress > 0 && imageUploadProgress < 100 && (
+            <CircularProgressbar
+              value={imageUploadProgress}
+              text={`${imageUploadProgress}%`}
+              styles={buildStyles({
+                pathColor: '#4db8ff',
+                textColor: '#fff',
+                trailColor: '#d6d6d6',
+                backgroundColor: '#f4f4f4',
+              })}
+            />
+          )}
+        </div>
 
-        {/* Error Alert */}
-        {publishError && (
-          <Alert className="mt-5" color="failure">
-            {publishError}
-          </Alert>
-        )}
+        {/* Error Handling */}
+        {imageUploadError && <Alert color="failure">{imageUploadError}</Alert>}
+        {publishError && <Alert color="failure">{publishError}</Alert>}
+
+        {/* Submit Button */}
+        <Button type="submit">Publish</Button>
       </form>
     </div>
   );

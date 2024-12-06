@@ -97,7 +97,10 @@ export const updatepost = async (req, res, next) => {
         $set: {
           title: req.body.title,
           content: req.body.content,
+          product : req.body.product,
           category: req.body.category,
+          department : req.body.department,
+          articleType : req.body.articleType,
           image: req.body.image,
         },
       },
