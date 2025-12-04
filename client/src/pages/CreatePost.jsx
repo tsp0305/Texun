@@ -70,7 +70,7 @@ export default function CreatePost() {
     };
 
     try {
-      const res = await fetch('http://localhost:5173/api/post/create', {
+      const res = await fetch('http://localhost:3000/api/post/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
