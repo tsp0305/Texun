@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, Button, FileInput, Select, TextInput } from 'flowbite-react';
+import { Alert, Button, FileInput, Select, TextInput, Progress, Textarea } from 'flowbite-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
 import { useNavigate } from 'react-router-dom';
 import './darkMode.css';
 
@@ -17,6 +15,16 @@ export default function CreatePost() {
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [publishError, setPublishError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // RAG States
+  const [pdfFile, setPdfFile] = useState(null);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [pdfUploadMessage, setPdfUploadMessage] = useState(null);
+  const [aiTopic, setAiTopic] = useState('');
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [aiGenerateError, setAiGenerateError] = useState(null);
+  const [aiArticleLength, setAiArticleLength] = useState('Medium');
+  const [aiCustomPrompt, setAiCustomPrompt] = useState('');
 
   const navigate = useNavigate();
 
@@ -121,8 +129,78 @@ export default function CreatePost() {
     xhr.send(data);
   };
 
+  const handleUploadPdf = async () => {
+    if (!pdfFile) {
+      setPdfUploadMessage({ type: 'failure', text: 'Please select a PDF file first.' });
+      return;
+    }
+
+    setIsUploadingPdf(true);
+    setPdfUploadMessage(null);
+
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+
+    try {
+      const res = await fetch('http://localhost:5000/api/pdf/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setPdfUploadMessage({ type: 'failure', text: data.message || 'Failed to upload PDF.' });
+      } else {
+        setPdfUploadMessage({ type: 'success', text: 'PDF successfully processed and indexed!' });
+      }
+    } catch (error) {
+      setPdfUploadMessage({ type: 'failure', text: 'Server error while uploading PDF.' });
+    } finally {
+      setIsUploadingPdf(false);
+    }
+  };
+
+  const handleGenerateContent = async () => {
+    if (!aiTopic) {
+      setAiGenerateError('Please enter a topic for AI generation.');
+      return;
+    }
+
+    setIsGeneratingContent(true);
+    setAiGenerateError(null);
+
+    try {
+      const res = await fetch('http://localhost:5000/api/rag/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          topic: aiTopic,
+          articleLength: aiArticleLength,
+          customPrompt: aiCustomPrompt
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAiGenerateError(data.message || 'Failed to generate content.');
+      } else {
+        // Populate ReactQuill and Title
+        handleInputChange('content', data.data.content);
+        if (!formData.title) {
+          handleInputChange('title', aiTopic);
+        }
+      }
+    } catch (error) {
+      setAiGenerateError('Server error while generating content.');
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
+
   const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -134,11 +212,63 @@ export default function CreatePost() {
         {isDarkMode ? 'Light Mode' : 'Dark Mode'}
       </Button>
 
+      {/* AI Generator Panel */}
+      <div className="mb-8 p-4 border-2 border-purple-400 border-dashed rounded-lg bg-purple-50 dark:bg-gray-800">
+        <h2 className="text-xl font-semibold mb-4 text-purple-700 dark:text-purple-400">🤖 AI Content Generator</h2>
+        
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4 items-center">
+            <FileInput accept=".pdf" onChange={(e) => setPdfFile(e.target.files[0])} />
+            <Button 
+              type="button" 
+              gradientDuoTone="purpleToBlue" 
+              onClick={handleUploadPdf}
+              disabled={isUploadingPdf}
+            >
+              {isUploadingPdf ? 'Indexing...' : 'Upload & Index PDF'}
+            </Button>
+          </div>
+          {pdfUploadMessage && (
+            <Alert color={pdfUploadMessage.type}>{pdfUploadMessage.text}</Alert>
+          )}
+
+          <div className="flex gap-4 items-center mt-2">
+            <Select value={aiArticleLength} onChange={(e) => setAiArticleLength(e.target.value)}>
+              <option value="Short">Short</option>
+              <option value="Medium">Medium</option>
+              <option value="Long">Long</option>
+            </Select>
+            <TextInput 
+              placeholder="Enter topic to generate blog..." 
+              value={aiTopic}
+              onChange={(e) => setAiTopic(e.target.value)}
+              className="flex-1"
+            />
+            <Button 
+              type="button" 
+              gradientDuoTone="pinkToOrange" 
+              onClick={handleGenerateContent}
+              disabled={isGeneratingContent}
+            >
+              {isGeneratingContent ? 'Generating...' : 'Generate Post'}
+            </Button>
+          </div>
+          <Textarea 
+            placeholder="Optional custom instructions (e.g., 'Make it sound professional', 'Focus on section 3')"
+            value={aiCustomPrompt}
+            onChange={(e) => setAiCustomPrompt(e.target.value)}
+            rows={2}
+          />
+          {aiGenerateError && <Alert color="failure">{aiGenerateError}</Alert>}
+        </div>
+      </div>
+
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <TextInput
           type="text"
           placeholder="Title"
           required
+          value={formData.title || ''}
           onChange={(e) => handleInputChange('title', e.target.value)}
         />
 
@@ -188,11 +318,7 @@ export default function CreatePost() {
         </Button>
 
         {imageUploadProgress > 0 && (
-          <CircularProgressbar
-            value={imageUploadProgress}
-            text={`${imageUploadProgress}%`}
-            styles={buildStyles({ pathColor: '#3498db' })}
-          />
+          <Progress progress={imageUploadProgress} size="lg" textLabel="Uploading..." labelProgress={true} />
         )}
 
         {imageUploadError && <Alert color="failure">{imageUploadError}</Alert>}

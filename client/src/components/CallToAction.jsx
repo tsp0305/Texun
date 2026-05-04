@@ -37,36 +37,35 @@ const topics = [
       title: "Fibre Manufacturing",
       description: "Learn fundamental spinning methods and best practices for beginners",
       link: "/basic-spinning",
-      image: "https://via.placeholder.com/400x400.png?text=Basic+Spinning",
+      image: "https://placehold.co/400x400?text=Basic+Spinning",
       alt: "Basic spinning techniques demonstration"
     },
     {
       title: "Yarn Manufacturing",
       description: "Master the art of preparing different types of fibers for spinning",
       link: "/fiber-preparation",
-      image: "https://via.placeholder.com/400x400.png?text=Fiber+Prep",
+      image: "https://placehold.co/400x400?text=Fiber+Prep",
       alt: "Advanced fiber preparation methods"
     },
     {
       title: "Fabric Manufacturing",
       description: "Comprehensive guide to spinning wheels and tools",
       link: "/equipment",
-      image: "https://via.placeholder.com/400x400.png?text=Equipment",
+      image: "https://placehold.co/400x400?text=Equipment",
       alt: "Various spinning equipment and tools"
     },
     {
       title: "Costing",
       description: "Create unique yarn patterns and textures",
       link: "/patterns",
-      image: "https://via.placeholder.com/400x400.png?text=Patterns",
+      image: "https://placehold.co/400x400?text=Patterns",
       alt: "Different yarn patterns and textures"
-    }
-    ,
+    },
     {
         title: "Service",
         description: "Create unique yarn patterns and textures",
         link: "/patterns",
-        image: "https://via.placeholder.com/400x400.png?text=Patterns",
+        image: "https://placehold.co/400x400?text=Patterns",
         alt: "Different yarn patterns and textures"
       }
   ];
@@ -123,6 +122,7 @@ export default function SpinningCarousel() {
                     isImageLoading ? 'opacity-0' : 'opacity-100'
                   }`}
                   onLoad={handleImageLoad}
+                  onError={handleImageLoad}
                 />
               </div>
             </div>

@@ -1,9 +1,7 @@
-import { Alert, Button, FileInput, Select, TextInput } from 'flowbite-react';
+import { Alert, Button, FileInput, Select, TextInput, Progress } from 'flowbite-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useEffect, useState } from 'react';
-import { CircularProgressbar } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -239,7 +237,7 @@ export default function UpdatePost() {
             onChange={(e) => handleInputChange('department', e.target.value)}
           >
             <option value="">Select</option>
-            {product[selectedCategory].types[selectedSubCategory].map((suboption) => (
+            {product[selectedCategory]?.types[selectedSubCategory]?.map((suboption) => (
               <option key={suboption} value={suboption}>
                 {suboption}
               </option>
@@ -260,21 +258,29 @@ export default function UpdatePost() {
             onClick={uploadImageToCloudinary}
             disabled={imageUploadProgress !== null}
           >
-            {imageUploadProgress !== null ? (
-              <div className='w-16 h-16'>
-                <CircularProgressbar
-                  value={imageUploadProgress}
-                  text={`${imageUploadProgress}%`}
-                />
-              </div>
-            ) : (
-              'Upload Image'
-            )}
+            {imageUploadProgress !== null ? 'Uploading...' : 'Upload Image'}
           </Button>
         </div>
+        {imageUploadProgress !== null && (
+          <Progress progress={imageUploadProgress} size="sm" color="blue" labelProgress={true} />
+        )}
         {imageUploadError && <Alert color='failure'>{imageUploadError}</Alert>}
         {formData.image && (
-          <img src={formData.image} alt='Uploaded' className='mt-3 w-40' />
+          <div className='flex flex-col items-start gap-2 mt-3'>
+            <img src={formData.image} alt='Uploaded' className='w-40 object-cover rounded-lg' />
+            <Button 
+              type='button' 
+              color='failure' 
+              size='xs' 
+              outline
+              onClick={() => {
+                handleInputChange('image', '');
+                setFile(null);
+              }}
+            >
+              Remove Image
+            </Button>
+          </div>
         )}
 
         <div>

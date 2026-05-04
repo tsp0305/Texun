@@ -175,6 +175,20 @@ export default function DashProfile() {
               value={imageFileUploadProgress}
               text={`${imageFileUploadProgress}%`}
               strokeWidth={5}
+              styles={{
+                root: {
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                },
+                path: {
+                  stroke: `rgba(62, 152, 199, ${
+                    imageFileUploadProgress / 100
+                  })`,
+                },
+              }}
             />
           )}
           <img
