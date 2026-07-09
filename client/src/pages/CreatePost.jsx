@@ -66,16 +66,17 @@ export default function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.content || !imageFileUrl) {
+    if (!formData.title || !formData.content) {
       setPublishError('Please fill all required fields.');
       return;
     }
 
     const payload = {
       ...formData,
-      image: imageFileUrl,
-      subCategory: selectedSubCategory,
     };
+    if (imageFileUrl) {
+      payload.image = imageFileUrl;
+    }
 
     try {
       const res = await fetch('/api/post/create', {
@@ -272,33 +273,68 @@ export default function CreatePost() {
           onChange={(e) => handleInputChange('title', e.target.value)}
         />
 
-        <Select onChange={(e) => handleInputChange('articleType', e.target.value)}>
-          <option value="">Select Article Type</option>
+        <Select
+          value={formData.articleType || ''}
+          onChange={(e) => handleInputChange('articleType', e.target.value)}
+        >
+          <option value="Others">Select Article Type</option>
           <option value="Machines">Machines</option>
           <option value="MOP">MOP</option>
           <option value="Manual">Manual</option>
           <option value="Formulas">Formulas</option>
         </Select>
 
+        {/* Product Dropdown */}
         <Select
+          value={selectedCategory}
           onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            handleInputChange('product', e.target.value);
+            const value = e.target.value;
+            setSelectedCategory(value);
+            handleInputChange('product', value);
             setSelectedSubCategory('');
-          }}>
+            handleInputChange('category', '');
+            handleInputChange('department', '');
+          }}
+        >
           <option value="">Select Product</option>
-          {Object.keys(product).map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
+          {Object.keys(product).map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
           ))}
         </Select>
 
-        {/* Dynamic Subcategory */}
+        {/* Subcategory Dropdown */}
         {selectedCategory && (
           <Select
-            onChange={(e) => setSelectedSubCategory(e.target.value)}>
-            <option value="">Select Subcategory</option>
-            {Object.values(product[selectedCategory].types).flat().map((sub) => (
-              <option key={sub}>{sub}</option>
+            value={selectedSubCategory}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSelectedSubCategory(value);
+              handleInputChange('category', value);
+              handleInputChange('department', '');
+            }}
+          >
+            <option value="">Select Product Category</option>
+            {Object.keys(product[selectedCategory].types).map((subcategory) => (
+              <option key={subcategory} value={subcategory}>
+                {subcategory}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        {/* Suboption of Subcategory Dropdown */}
+        {selectedSubCategory && (
+          <Select
+            value={formData.department || ''}
+            onChange={(e) => handleInputChange('department', e.target.value)}
+          >
+            <option value="">Select</option>
+            {product[selectedCategory]?.types[selectedSubCategory]?.map((suboption) => (
+              <option key={suboption} value={suboption}>
+                {suboption}
+              </option>
             ))}
           </Select>
         )}

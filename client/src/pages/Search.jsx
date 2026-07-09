@@ -1,6 +1,7 @@
 import { Button, Select } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import PostCard from '../components/PostCard';
 
 const product = {
   'Fibre Manufacturing': {
@@ -62,6 +63,9 @@ export default function Search() {
 
   const [subCategories, setSubCategories] = useState([]);
   const [types, setTypes] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,7 +77,7 @@ export default function Search() {
 
   const handleProductChange = (e) => {
     const selectedProduct = e.target.value;
-    setSidebarData((prev) => ({ ...prev, product: selectedProduct, category: '', department: '' }));
+    setSidebarData((prev) => ({ ...prev, product: selectedProduct, category: 'uncategorized', department: 'not selected' }));
     setSubCategories(Object.keys(product[selectedProduct]?.types || {}));
     setTypes([]);
   };
@@ -81,7 +85,7 @@ export default function Search() {
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
     const typesForCategory = product[sidebarData.product]?.types[selectedCategory] || [];
-    setSidebarData((prev) => ({ ...prev, category: selectedCategory, department: '' }));
+    setSidebarData((prev) => ({ ...prev, category: selectedCategory, department: 'not selected' }));
     setTypes(typesForCategory);
   };
 
@@ -99,10 +103,103 @@ export default function Search() {
   };
 
   useEffect(() => {
-    console.log('Sidebar Data:', sidebarData);
-    console.log('Subcategories:', subCategories);
-    console.log('Types:', types);
-  }, [sidebarData, subCategories, types]);
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get('searchTerm') || '';
+    const sortFromUrl = urlParams.get('sort') || 'desc';
+    const productFromUrl = urlParams.get('product') || '';
+    const categoryFromUrl = urlParams.get('category') || '';
+    const departmentFromUrl = urlParams.get('department') || '';
+    const articleTypeFromUrl = urlParams.get('articleType') || '';
+
+    setSidebarData({
+      searchTerm: searchTermFromUrl,
+      sort: sortFromUrl,
+      product: productFromUrl || 'nil',
+      category: categoryFromUrl || 'uncategorized',
+      department: departmentFromUrl || 'not selected',
+      articleType: articleTypeFromUrl || 'Others',
+    });
+
+    if (productFromUrl && productFromUrl !== 'nil' && product[productFromUrl]) {
+      setSubCategories(Object.keys(product[productFromUrl].types || {}));
+      if (categoryFromUrl && categoryFromUrl !== 'uncategorized' && product[productFromUrl].types[categoryFromUrl]) {
+        setTypes(product[productFromUrl].types[categoryFromUrl]);
+      } else {
+        setTypes([]);
+      }
+    } else {
+      setSubCategories([]);
+      setTypes([]);
+    }
+
+    const fetchPosts = async () => {
+      setLoading(true);
+      const cleanedParams = new URLSearchParams();
+      if (searchTermFromUrl) cleanedParams.set('searchTerm', searchTermFromUrl);
+      if (sortFromUrl) cleanedParams.set('order', sortFromUrl);
+      if (productFromUrl && productFromUrl !== 'nil') cleanedParams.set('product', productFromUrl);
+      if (categoryFromUrl && categoryFromUrl !== 'uncategorized' && categoryFromUrl !== '') cleanedParams.set('category', categoryFromUrl);
+      if (departmentFromUrl && departmentFromUrl !== 'not selected' && departmentFromUrl !== '') cleanedParams.set('department', departmentFromUrl);
+      if (articleTypeFromUrl && articleTypeFromUrl !== 'Others') cleanedParams.set('articleType', articleTypeFromUrl);
+
+      try {
+        const res = await fetch(`/api/post/getposts?${cleanedParams.toString()}`);
+        if (!res.ok) {
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setPosts(data.posts);
+        setLoading(false);
+        if (data.posts.length === 9) {
+          setShowMore(true);
+        } else {
+          setShowMore(false);
+        }
+      } catch (error) {
+        setLoading(false);
+        console.log(error);
+      }
+    };
+    fetchPosts();
+  }, [location.search]);
+
+  const handleShowMore = async () => {
+    const numberOfPosts = posts.length;
+    const startIndex = numberOfPosts;
+    const urlParams = new URLSearchParams(location.search);
+    
+    const cleanedParams = new URLSearchParams();
+    const searchTerm = urlParams.get('searchTerm');
+    const sort = urlParams.get('sort') || 'desc';
+    const productVal = urlParams.get('product');
+    const categoryVal = urlParams.get('category');
+    const departmentVal = urlParams.get('department');
+    const articleTypeVal = urlParams.get('articleType');
+
+    if (searchTerm) cleanedParams.set('searchTerm', searchTerm);
+    if (sort) cleanedParams.set('order', sort);
+    if (productVal && productVal !== 'nil') cleanedParams.set('product', productVal);
+    if (categoryVal && categoryVal !== 'uncategorized' && categoryVal !== '') cleanedParams.set('category', categoryVal);
+    if (departmentVal && departmentVal !== 'not selected' && departmentVal !== '') cleanedParams.set('department', departmentVal);
+    if (articleTypeVal && articleTypeVal !== 'Others') cleanedParams.set('articleType', articleTypeVal);
+    cleanedParams.set('startIndex', startIndex);
+
+    try {
+      const res = await fetch(`/api/post/getposts?${cleanedParams.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPosts((prev) => [...prev, ...data.posts]);
+        if (data.posts.length === 9) {
+          setShowMore(true);
+        } else {
+          setShowMore(false);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className='flex flex-col md:flex-row'>
@@ -170,7 +267,23 @@ export default function Search() {
           Posts results:
         </h1>
         <div className='p-7 flex flex-wrap gap-4'>
-          {/* Render posts here */}
+          {!loading && posts.length === 0 && (
+            <p className='text-xl text-gray-500'>No posts found.</p>
+          )}
+          {loading && (
+            <p className='text-xl text-gray-500'>Loading...</p>
+          )}
+          {!loading &&
+            posts &&
+            posts.map((post) => <PostCard key={post._id} post={post} />)}
+          {showMore && (
+            <button
+              onClick={handleShowMore}
+              className='text-teal-500 text-lg hover:underline p-7 w-full'
+            >
+              Show More
+            </button>
+          )}
         </div>
       </div>
     </div>
