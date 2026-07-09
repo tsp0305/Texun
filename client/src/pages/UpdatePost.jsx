@@ -244,7 +244,7 @@ export default function UpdatePost() {
             ))}
           </Select>
         )}
-        <div className='flex gap-4 items-center justify-between border-4 border-teal-500 border-dotted p-3'>
+        <div className='flex gap-4 items-center justify-between border border-slate-200 dark:border-slate-800 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/50'>
           <FileInput
             type='file'
             accept='image/*'
@@ -252,7 +252,7 @@ export default function UpdatePost() {
           />
           <Button
             type='button'
-            gradientDuoTone='purpleToBlue'
+            color='indigo'
             size='sm'
             outline
             onClick={uploadImageToCloudinary}
@@ -266,8 +266,9 @@ export default function UpdatePost() {
         )}
         {imageUploadError && <Alert color='failure'>{imageUploadError}</Alert>}
         {formData.image && (
-          <div className='flex flex-col items-start gap-2 mt-3'>
-            <img src={formData.image} alt='Uploaded' className='w-40 object-cover rounded-lg' />
+          <div className='flex flex-col items-start gap-2 mt-2 p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/30 dark:bg-slate-900/30'>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Cover Image Preview</span>
+            <img src={formData.image} alt='Uploaded' className='w-48 object-cover rounded-lg' />
             <Button 
               type='button' 
               color='failure' 
@@ -283,7 +284,7 @@ export default function UpdatePost() {
           </div>
         )}
 
-        <div>
+        <div className="mt-3">
           <ReactQuill
             theme="snow"
             value={formData.content || ''}
@@ -294,8 +295,8 @@ export default function UpdatePost() {
 
         {publishError && <Alert color='failure'>{publishError}</Alert>}
 
-        <Button type='submit' gradientDuoTone='greenToBlue' disabled={imageUploadProgress !== null}>
-          Update Post
+        <Button type='submit' color='indigo' disabled={imageUploadProgress !== null} className="mt-4 font-semibold">
+          Update Publication
         </Button>
       </form>
     </div>

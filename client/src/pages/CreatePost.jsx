@@ -213,54 +213,117 @@ export default function CreatePost() {
         {isDarkMode ? 'Light Mode' : 'Dark Mode'}
       </Button>
 
-      {/* AI Generator Panel */}
-      <div className="mb-8 p-4 border-2 border-purple-400 border-dashed rounded-lg bg-purple-50 dark:bg-gray-800">
-        <h2 className="text-xl font-semibold mb-4 text-purple-700 dark:text-purple-400">🤖 AI Content Generator</h2>
+      {/* AI Assistant Panel */}
+      <div className="mb-8 p-6 bg-slate-150/40 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="p-1 bg-indigo-50 dark:bg-indigo-950/60 rounded text-indigo-600 dark:text-indigo-400">
+            <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3.096 15H3l5.096-.813L9 9l.813 5.096L15 14.904v.192l-5.187.808z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.071 4.929l-.707 1.838-.707-1.838-.707-.707 1.838-.707.707 1.838.707-1.838.707.707-1.838.707z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Gemini Editorial Draft Assistant</h2>
+        </div>
         
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-4 items-center">
-            <FileInput accept=".pdf" onChange={(e) => setPdfFile(e.target.files[0])} />
-            <Button 
-              type="button" 
-              gradientDuoTone="purpleToBlue" 
-              onClick={handleUploadPdf}
-              disabled={isUploadingPdf}
-            >
-              {isUploadingPdf ? 'Indexing...' : 'Upload & Index PDF'}
-            </Button>
+        <div className="flex flex-col gap-5 text-sm">
+          {/* Step 1: Document Indexer */}
+          <div className="flex flex-col gap-2 p-4 bg-white dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-lg">
+            <label className="font-semibold text-slate-700 dark:text-slate-350 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 flex items-center justify-center text-xs">1</span>
+              Load Source Document (PDF)
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center mt-1">
+              <div className="flex-1">
+                <FileInput accept=".pdf" onChange={(e) => setPdfFile(e.target.files[0])} />
+              </div>
+              <Button 
+                type="button" 
+                color="indigo"
+                onClick={handleUploadPdf}
+                disabled={isUploadingPdf}
+                className="font-semibold text-xs py-0.5"
+              >
+                {isUploadingPdf ? 'Processing PDF...' : 'Index Document'}
+              </Button>
+            </div>
+            {pdfUploadMessage && (
+              <Alert className="mt-2 text-xs" color={pdfUploadMessage.type === 'success' ? 'success' : 'failure'}>
+                {pdfUploadMessage.text}
+              </Alert>
+            )}
           </div>
-          {pdfUploadMessage && (
-            <Alert color={pdfUploadMessage.type}>{pdfUploadMessage.text}</Alert>
-          )}
 
-          <div className="flex gap-4 items-center mt-2">
-            <Select value={aiArticleLength} onChange={(e) => setAiArticleLength(e.target.value)}>
-              <option value="Short">Short</option>
-              <option value="Medium">Medium</option>
-              <option value="Long">Long</option>
-            </Select>
-            <TextInput 
-              placeholder="Enter topic to generate blog..." 
-              value={aiTopic}
-              onChange={(e) => setAiTopic(e.target.value)}
-              className="flex-1"
-            />
-            <Button 
-              type="button" 
-              gradientDuoTone="pinkToOrange" 
-              onClick={handleGenerateContent}
-              disabled={isGeneratingContent}
-            >
-              {isGeneratingContent ? 'Generating...' : 'Generate Post'}
-            </Button>
+          {/* Step 2: Content Generation Options */}
+          <div className="flex flex-col gap-3 p-4 bg-white dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-lg">
+            <label className="font-semibold text-slate-700 dark:text-slate-350 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 flex items-center justify-center text-xs">2</span>
+              Generate Article Draft
+            </label>
+
+            <div className="flex flex-col md:flex-row gap-3 mt-1">
+              {/* Length Selector */}
+              <div className="w-full md:w-36">
+                <Select value={aiArticleLength} onChange={(e) => setAiArticleLength(e.target.value)}>
+                  <option value="Short">Short (~500w)</option>
+                  <option value="Medium">Medium (~1000w)</option>
+                  <option value="Long">Long (~1500w+)</option>
+                </Select>
+              </div>
+
+              {/* Topic Input */}
+              <div className="flex-grow">
+                <TextInput 
+                  placeholder="E.g., Carding machine speeds or Raw cotton blending ratios..." 
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                />
+              </div>
+
+              {/* Generate Button */}
+              <Button 
+                type="button" 
+                color="indigo"
+                onClick={handleGenerateContent}
+                disabled={isGeneratingContent}
+                className="font-semibold text-xs"
+              >
+                {isGeneratingContent ? 'Drafting...' : 'Generate Article'}
+              </Button>
+            </div>
+
+            {/* Custom Instructions */}
+            <div className="mt-2">
+              <Textarea 
+                placeholder="Optional style directions (e.g., 'Write in a professional tone, focus on mechanical safety standards')"
+                value={aiCustomPrompt}
+                onChange={(e) => setAiCustomPrompt(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+            </div>
+
+            {/* Prompt presets */}
+            <div className="flex flex-wrap gap-1.5 items-center mt-1">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Quick suggestions:</span>
+              {[
+                "Write in a highly professional technical tone",
+                "Structure as a step-by-step operation manual",
+                "Compare standard configurations and speeds",
+                "Explain chemical parameters and temperature targets"
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => setAiCustomPrompt(suggestion)}
+                  className="text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-2 py-0.5 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                >
+                  {suggestion.slice(0, 30)}...
+                </button>
+              ))}
+            </div>
+            
+            {aiGenerateError && <Alert className="mt-2 text-xs" color="failure">{aiGenerateError}</Alert>}
           </div>
-          <Textarea 
-            placeholder="Optional custom instructions (e.g., 'Make it sound professional', 'Focus on section 3')"
-            value={aiCustomPrompt}
-            onChange={(e) => setAiCustomPrompt(e.target.value)}
-            rows={2}
-          />
-          {aiGenerateError && <Alert color="failure">{aiGenerateError}</Alert>}
         </div>
       </div>
 
@@ -344,23 +407,47 @@ export default function CreatePost() {
           onChange={(value) => handleInputChange('content', value)}
         />
 
-        <FileInput onChange={(e) => setFile(e.target.files[0])} />
-
-        <Button
-          type="button"
-          disabled={imageUploadProgress > 0 && imageUploadProgress < 100}
-          onClick={uploadImageToCloudinary}>
-          Upload Image
-        </Button>
+        <div className='flex gap-4 items-center justify-between border border-slate-200 dark:border-slate-800 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/50'>
+          <FileInput accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+          <Button
+            type="button"
+            color="indigo"
+            size="sm"
+            outline
+            disabled={imageUploadProgress > 0 && imageUploadProgress < 100}
+            onClick={uploadImageToCloudinary}>
+            Upload Image
+          </Button>
+        </div>
 
         {imageUploadProgress > 0 && (
-          <Progress progress={imageUploadProgress} size="lg" textLabel="Uploading..." labelProgress={true} />
+          <Progress progress={imageUploadProgress} size="sm" color="blue" labelProgress={true} />
         )}
 
         {imageUploadError && <Alert color="failure">{imageUploadError}</Alert>}
+        
+        {formData.image && (
+          <div className='flex flex-col items-start gap-2 mt-2 p-3 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/30 dark:bg-slate-900/30'>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Cover Image Preview</span>
+            <img src={formData.image} alt='Uploaded' className='w-48 object-cover rounded-lg' />
+            <Button 
+              type='button' 
+              color='failure' 
+              size='xs' 
+              outline
+              onClick={() => {
+                handleInputChange('image', '');
+                setFile(null);
+              }}
+            >
+              Remove Image
+            </Button>
+          </div>
+        )}
+
         {publishError && <Alert color="failure">{publishError}</Alert>}
 
-        <Button type="submit">Publish</Button>
+        <Button type="submit" color="indigo" className="mt-4 font-semibold">Publish Article</Button>
       </form>
     </div>
   );

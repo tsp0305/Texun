@@ -38,71 +38,85 @@ export default function SignUp() {
     }
   };
   return (
-    <div className='min-h-screen mt-20'>
-      <div className='flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5'>
-        {/* left */}
-        <div className='flex-1'>
-        <Link to="/" style={{ position: 'relative', display: 'inline-block' }}>
-        {/* Infinity Symbol Behind with Gradient */}
-        
-        
-        {/* "Texun" Text with Gradient and Slight Gap */}
-        <span style={{
-            fontWeight: 'bold', 
-            fontSize: '2rem', 
-            color: 'transparent', 
-            background: 'linear-gradient(to right, #2c3e50, #2980b9)', // Gradient from dark to light blue
-            WebkitBackgroundClip: 'text', 
-            letterSpacing: '0.1rem' // Slight spacing between letters
-        }}>
-          TEX<span style={{ marginLeft: '0.25rem' }}></span>UN
-        </span>
-      </Link>
-          <p className='text-sm mt-5'>
-            This is a demo project. You can sign up with your email and password
-            or with Google.
+    <div className='min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/50 dark:bg-slate-950/20'>
+      <div className='max-w-4xl w-full flex flex-col md:flex-row gap-10 items-stretch md:items-center'>
+        {/* left pane */}
+        <div className='flex-1 flex flex-col justify-center gap-4'>
+          <Link to="/" className="flex items-center gap-2 group self-start">
+            <div className="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl">
+              <svg
+                className="w-6 h-6 text-indigo-600 dark:text-indigo-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <span className="font-extrabold text-2xl tracking-wider text-slate-800 dark:text-slate-100 font-sans">
+              TEX<span className="text-indigo-600 dark:text-indigo-400">UN</span>
+            </span>
+          </Link>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">
+            Create an Author Account
+          </h2>
+          <p className='text-sm text-slate-500 dark:text-slate-400 leading-relaxed'>
+            Join our expert community. Sign up to submit technical papers, draft posts using documentation references, and discuss manufacturing best practices.
           </p>
         </div>
-        {/* right */}
 
-        <div className='flex-1'>
-          <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
+        {/* right pane */}
+        <div className='flex-grow md:w-[420px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm'>
+          <form className='flex flex-col gap-5' onSubmit={handleSubmit}>
             <div>
-              <Label value='Your username' />
+              <div className="mb-2 block">
+                <Label value='Username' className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider" />
+              </div>
               <TextInput
                 type='text'
-                placeholder='Username'
+                placeholder='E.g., yarn_master'
                 id='username'
+                required
                 onChange={handleChange}
               />
             </div>
             <div>
-              <Label value='Your email' />
+              <div className="mb-2 block">
+                <Label value='Email Address' className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider" />
+              </div>
               <TextInput
                 type='email'
                 placeholder='name@company.com'
                 id='email'
+                required
                 onChange={handleChange}
               />
             </div>
             <div>
-              <Label value='Your password' />
+              <div className="mb-2 block">
+                <Label value='Password' className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider" />
+              </div>
               <TextInput
                 type='password'
-                placeholder='Password'
+                placeholder='••••••••'
                 id='password'
+                required
                 onChange={handleChange}
               />
             </div>
             <Button
-              gradientDuoTone='purpleToPink'
+              color='indigo'
               type='submit'
               disabled={loading}
+              className="font-semibold text-sm py-0.5 mt-2"
             >
               {loading ? (
                 <>
                   <Spinner size='sm' />
-                  <span className='pl-3'>Loading...</span>
+                  <span className='pl-3'>Creating Account...</span>
                 </>
               ) : (
                 'Sign Up'
@@ -110,14 +124,14 @@ export default function SignUp() {
             </Button>
             <OAuth />
           </form>
-          <div className='flex gap-2 text-sm mt-5'>
-            <span>Have an account?</span>
-            <Link to='/sign-in' className='text-blue-500'>
+          <div className='flex gap-2 text-xs mt-6 text-slate-500 dark:text-slate-400 justify-center border-t border-slate-100 dark:border-slate-800 pt-4'>
+            <span>Already have an account?</span>
+            <Link to='/sign-in' className='text-indigo-600 dark:text-indigo-400 font-semibold hover:underline'>
               Sign In
             </Link>
           </div>
           {errorMessage && (
-            <Alert className='mt-5' color='failure'>
+            <Alert className='mt-4 text-xs' color='failure'>
               {errorMessage}
             </Alert>
           )}

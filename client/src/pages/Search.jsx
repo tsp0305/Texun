@@ -200,14 +200,16 @@ export default function Search() {
       console.log(error);
     }
   };
-
   return (
-    <div className='flex flex-col md:flex-row'>
-      <div className='p-7 border-b md:border-r md:min-h-screen border-gray-500'>
-        <form className='flex flex-col gap-8' onSubmit={handleSubmit}>
-          <div className='flex items-center gap-2'>
-            <label className='font-semibold'>Product:</label>
-            <Select id='product' value={sidebarData.product} onChange={handleProductChange}>
+    <div className='flex flex-col md:flex-row min-h-screen bg-slate-50/30 dark:bg-slate-950/20'>
+      {/* Filters Sidebar */}
+      <div className='p-6 md:p-8 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 w-full md:w-80 flex-shrink-0 transition-colors duration-200'>
+        <form className='flex flex-col gap-6' onSubmit={handleSubmit}>
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">Filter Articles</h3>
+          
+          <div className='flex flex-col gap-2'>
+            <label className='text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide'>Product Scope</label>
+            <Select id='product' value={sidebarData.product} onChange={handleProductChange} className="w-full">
               <option value='nil'>Select Product</option>
               {Object.keys(product).map((key) => (
                 <option key={key} value={key}>
@@ -216,11 +218,11 @@ export default function Search() {
               ))}
             </Select>
           </div>
-
+ 
           {subCategories.length > 0 && (
-            <div className='flex items-center gap-2'>
-              <label className='font-semibold'>Category:</label>
-              <Select id='category' value={sidebarData.category} onChange={handleCategoryChange}>
+            <div className='flex flex-col gap-2'>
+              <label className='text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide'>Category</label>
+              <Select id='category' value={sidebarData.category} onChange={handleCategoryChange} className="w-full">
                 <option value='uncategorized'>Select Category</option>
                 {subCategories.map((subCategory) => (
                   <option key={subCategory} value={subCategory}>
@@ -230,11 +232,11 @@ export default function Search() {
               </Select>
             </div>
           )}
-
+ 
           {types.length > 0 && (
-            <div className='flex items-center gap-2'>
-              <label className='font-semibold'>Department:</label>
-              <Select id='department' value={sidebarData.department} onChange={handleTypeChange}>
+            <div className='flex flex-col gap-2'>
+              <label className='text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide'>Department</label>
+              <Select id='department' value={sidebarData.department} onChange={handleTypeChange} className="w-full">
                 <option value='not selected'>Select Department</option>
                 {types.map((type) => (
                   <option key={type} value={type}>
@@ -244,10 +246,10 @@ export default function Search() {
               </Select>
             </div>
           )}
-
-          <div className='flex items-center gap-2'>
-            <label className='font-semibold'>Article Type:</label>
-            <Select id='articleType' value={sidebarData.articleType} onChange={handleChange}>
+ 
+          <div className='flex flex-col gap-2'>
+            <label className='text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide'>Article Type</label>
+            <Select id='articleType' value={sidebarData.articleType} onChange={handleChange} className="w-full">
               <option value='Others'>Select Article Type</option>
               <option value='Machines'>Machines</option>
               <option value='MOP'>MOP</option>
@@ -255,34 +257,47 @@ export default function Search() {
               <option value='Formulas'>Formulas</option>
             </Select>
           </div>
-
-          <Button type='submit' outline gradientDuoTone='purpleToPink'>
+ 
+          <Button type='submit' color="indigo" className="font-semibold mt-2">
             Apply Filters
           </Button>
         </form>
       </div>
-
+ 
+      {/* Results grid */}
       <div className='w-full'>
-        <h1 className='text-3xl font-semibold sm:border-b border-gray-500 p-3 mt-5'>
-          Posts results:
-        </h1>
-        <div className='p-7 flex flex-wrap gap-4'>
+        <div className="border-b border-slate-200 dark:border-slate-800 p-5 mt-2 flex items-center justify-between">
+          <h1 className='text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white'>
+            Publication Results
+          </h1>
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+            {posts ? posts.length : 0} articles matched
+          </span>
+        </div>
+        <div className='p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center'>
           {!loading && posts.length === 0 && (
-            <p className='text-xl text-gray-500'>No posts found.</p>
+            <div className="col-span-full py-16 text-center text-slate-500 dark:text-slate-400">
+              <p className='text-base'>No articles matched the filter selection.</p>
+            </div>
           )}
           {loading && (
-            <p className='text-xl text-gray-500'>Loading...</p>
+            <div className="col-span-full py-16 text-center text-slate-500 dark:text-slate-400">
+              <div className="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className='mt-3 text-sm'>Loading publications...</p>
+            </div>
           )}
           {!loading &&
             posts &&
             posts.map((post) => <PostCard key={post._id} post={post} />)}
           {showMore && (
-            <button
-              onClick={handleShowMore}
-              className='text-teal-500 text-lg hover:underline p-7 w-full'
-            >
-              Show More
-            </button>
+            <div className="col-span-full flex justify-center w-full mt-4">
+              <button
+                onClick={handleShowMore}
+                className='px-6 py-2 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-600 dark:text-slate-400 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-900 transition-all'
+              >
+                Show More Results
+              </button>
+            </div>
           )}
         </div>
       </div>
