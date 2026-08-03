@@ -15,6 +15,7 @@ import {
 } from '../redux/user/userSlice';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+import { updateUser, deleteUser, signOut } from '../api';
 
 export default function DashProfile() {
   const cld = new Cloudinary({ cloud: { cloudName: 'dqnuqzbyk' } });
@@ -99,21 +100,9 @@ export default function DashProfile() {
 
     try {
       dispatch(updateStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        dispatch(updateFailure(data.message));
-        setUpdateUserError(data.message);
-      } else {
-        dispatch(updateSuccess(data));
-        setUpdateUserSuccess("User's profile updated successfully");
-      }
+      const data = await updateUser(currentUser._id, formData);
+      dispatch(updateSuccess(data));
+      setUpdateUserSuccess("User's profile updated successfully");
     } catch (error) {
       dispatch(updateFailure(error.message));
       setUpdateUserError(error.message);
@@ -124,15 +113,8 @@ export default function DashProfile() {
     setShowModal(false);
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        dispatch(deleteUserFailure(data.message));
-      } else {
-        dispatch(deleteUserSuccess(data));
-      }
+      const data = await deleteUser(currentUser._id);
+      dispatch(deleteUserSuccess(data));
     } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
@@ -140,15 +122,8 @@ export default function DashProfile() {
 
   const handleSignout = async () => {
     try {
-      const res = await fetch('/api/user/signout', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data.message);
-      } else {
-        dispatch(signoutSuccess());
-      }
+      await signOut();
+      dispatch(signoutSuccess());
     } catch (error) {
       console.log(error.message);
       alert('Failed to sign out, please try again.');

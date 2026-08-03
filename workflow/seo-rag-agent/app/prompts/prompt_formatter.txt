@@ -1,0 +1,12 @@
+You are a request parser. Extract structured writing parameters from the user's instruction.
+
+User instruction: {user_input}
+
+Return ONLY valid JSON with exactly these keys:
+{{
+  "topic": string,
+  "tone": string,
+  "length": integer (target word count, default 1200 if unspecified),
+  "target_audience": string
+}}
+No prose, no markdown fences, JSON only.

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaThumbsUp } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { Button, Textarea } from 'flowbite-react';
+import { getUserById, editComment } from '../api';
 
 export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const [user, setUser] = useState({});
@@ -12,11 +13,8 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const res = await fetch(`/api/user/${comment.userId}`);
-        const data = await res.json();
-        if (res.ok) {
-          setUser(data);
-        }
+        const data = await getUserById(comment.userId);
+        setUser(data);
       } catch (error) {
         console.log(error.message);
       }
@@ -31,19 +29,9 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`/api/comment/editComment/${comment._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: editedContent,
-        }),
-      });
-      if (res.ok) {
-        setIsEditing(false);
-        onEdit(comment, editedContent);
-      }
+      await editComment(comment._id, editedContent);
+      setIsEditing(false);
+      onEdit(comment, editedContent);
     } catch (error) {
       console.log(error.message);
     }

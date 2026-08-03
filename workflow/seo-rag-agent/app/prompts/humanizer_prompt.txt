@@ -1,0 +1,8 @@
+Rewrite the following article to sound naturally human-written:
+- Vary sentence length and rhythm
+- Remove repetitive phrasing and filler
+- Keep all technical facts and figures unchanged
+- Preserve the SEO structure (title, meta description, headings, FAQs) exactly as given
+
+Article:
+{article}

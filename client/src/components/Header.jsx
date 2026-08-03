@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../redux/theme/themeSlice';
 import { signoutSuccess } from '../redux/user/userSlice';
 import { useEffect, useState } from 'react';
+import { signOut } from '../api';
 
 export default function Header() {
   const path = useLocation().pathname;
@@ -26,15 +27,8 @@ export default function Header() {
 
   const handleSignout = async () => {
     try {
-      const res = await fetch('/api/user/signout', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data.message);
-      } else {
-        dispatch(signoutSuccess());
-      }
+      await signOut();
+      dispatch(signoutSuccess());
     } catch (error) {
       console.log(error.message);
     }
@@ -49,26 +43,16 @@ export default function Header() {
   };
 
   return (
-    <Navbar className='border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md sticky top-0 z-50 transition-all duration-200'>
-      <Link to="/" className="flex items-center gap-2 group">
-        <div className="p-1.5 bg-slate-100 dark:bg-slate-900 rounded-lg group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/50 transition-colors duration-250">
-          <svg
-            className="w-5 h-5 text-indigo-600 dark:text-indigo-400 transition-transform duration-300 group-hover:scale-110"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-            <path d="M2 17l10 5 10-5" />
-            <path d="M2 12l10 5 10-5" />
-          </svg>
+    <Navbar fluid className='border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md sticky top-0 z-50 transition-all duration-200 px-2 sm:px-3 lg:px-4'>
+      <Link to="/" className="flex items-center gap-2 group -ml-1 sm:-ml-2">
+        <div className="flex flex-col leading-tight">
+          <span className="font-black text-xl tracking-[0.18em] text-slate-900 dark:text-slate-100">
+            TEX <span className="text-indigo-600 dark:text-indigo-400">∞</span> <span className="text-slate-700 dark:text-slate-300">UN</span>
+          </span>
+          <span className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+            Textile Unlimited
+          </span>
         </div>
-        <span className="font-bold text-lg tracking-wider text-slate-800 dark:text-slate-100 font-sans">
-          TEX<span className="text-indigo-600 dark:text-indigo-400">UN</span>
-        </span>
       </Link>
       <form onSubmit={handleSubmit} className="hidden lg:block relative">
         <TextInput

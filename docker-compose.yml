@@ -1,0 +1,48 @@
+services:
+  # Main MERN Backend and React Client
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: texun-backend
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PYTHON_AGENT_URL=http://workflow-service:8000/api/v1/generate-article
+    restart: always
+    depends_on:
+      - workflow-service
+
+  # Python SEO workflow agent
+  workflow-service:
+    build:
+      context: ./workflow/seo-rag-agent
+      dockerfile: Dockerfile
+    container_name: texun-workflow-service
+    ports:
+      - "8001:8000"
+    env_file:
+      - workflow/seo-rag-agent/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always
+
+  # Telegram bot for PDF -> draft -> publish flow
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+      dockerfile: Dockerfile
+    container_name: texun-telegram-bot
+    env_file:
+      - telegram-bot/.env
+    environment:
+      - NODE_ENV=production
+      - BLOG_API_URL=http://backend:3000
+      - WORKFLOW_AGENT_URL=http://workflow-service:8000/api/v1/generate-article
+    restart: always
+    depends_on:
+      - backend
+      - workflow-service

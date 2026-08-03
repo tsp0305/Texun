@@ -2,6 +2,7 @@ import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import OAuth from '../components/OAuth';
+import { signUp } from '../api';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
@@ -19,21 +20,11 @@ export default function SignUp() {
     try {
       setLoading(true);
       setErrorMessage(null);
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.success === false) {
-        return setErrorMessage(data.message);
-      }
+      await signUp(formData);
       setLoading(false);
-      if(res.ok) {
-        navigate('/sign-in');
-      }
+      navigate('/sign-in');
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message || 'Something went wrong');
       setLoading(false);
     }
   };
@@ -42,22 +33,9 @@ export default function SignUp() {
       <div className='max-w-4xl w-full flex flex-col md:flex-row gap-10 items-stretch md:items-center'>
         {/* left pane */}
         <div className='flex-1 flex flex-col justify-center gap-4'>
-          <Link to="/" className="flex items-center gap-2 group self-start">
-            <div className="p-2 bg-slate-100 dark:bg-slate-900 rounded-xl">
-              <svg
-                className="w-6 h-6 text-indigo-600 dark:text-indigo-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
+          <Link to="/" className="flex items-center gap-2 group self-start -ml-1 sm:-ml-2">
             <span className="font-extrabold text-2xl tracking-wider text-slate-800 dark:text-slate-100 font-sans">
-              TEX<span className="text-indigo-600 dark:text-indigo-400">UN</span>
+              TEX <span className="text-indigo-600 dark:text-indigo-400">∞</span> <span className="text-slate-700 dark:text-slate-300">UN</span>
             </span>
           </Link>
           <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">

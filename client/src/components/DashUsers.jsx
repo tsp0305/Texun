@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { FaCheck, FaTimes } from 'react-icons/fa';
+import { getUsers, deleteUser } from '../api';
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
@@ -13,13 +14,10 @@ export default function DashUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`/api/user/getusers`);
-        const data = await res.json();
-        if (res.ok) {
-          setUsers(data.users);
-          if (data.users.length < 9) {
-            setShowMore(false);
-          }
+        const data = await getUsers();
+        setUsers(data.users);
+        if (data.users.length < 9) {
+          setShowMore(false);
         }
       } catch (error) {
         console.log(error.message);
@@ -33,13 +31,10 @@ export default function DashUsers() {
   const handleShowMore = async () => {
     const startIndex = users.length;
     try {
-      const res = await fetch(`/api/user/getusers?startIndex=${startIndex}`);
-      const data = await res.json();
-      if (res.ok) {
-        setUsers((prev) => [...prev, ...data.users]);
-        if (data.users.length < 9) {
-          setShowMore(false);
-        }
+      const data = await getUsers(`startIndex=${startIndex}`);
+      setUsers((prev) => [...prev, ...data.users]);
+      if (data.users.length < 9) {
+        setShowMore(false);
       }
     } catch (error) {
       console.log(error.message);
@@ -48,18 +43,11 @@ export default function DashUsers() {
 
   const handleDeleteUser = async () => {
     try {
-        const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
-            method: 'DELETE',
-        });
-        const data = await res.json();
-        if (res.ok) {
-            setUsers((prev) => prev.filter((user) => user._id !== userIdToDelete));
-            setShowModal(false);
-        } else {
-            console.log(data.message);
-        }
+      await deleteUser(userIdToDelete);
+      setUsers((prev) => prev.filter((user) => user._id !== userIdToDelete));
+      setShowModal(false);
     } catch (error) {
-        console.log(error.message);
+      console.log(error.message);
     }
   };
 

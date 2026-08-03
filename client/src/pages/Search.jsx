@@ -2,6 +2,7 @@ import { Button, Select } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import { getPosts } from '../api';
 
 const product = {
   'Fibre Manufacturing': {
@@ -143,12 +144,7 @@ export default function Search() {
       if (articleTypeFromUrl && articleTypeFromUrl !== 'Others') cleanedParams.set('articleType', articleTypeFromUrl);
 
       try {
-        const res = await fetch(`/api/post/getposts?${cleanedParams.toString()}`);
-        if (!res.ok) {
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
+        const data = await getPosts(cleanedParams.toString());
         setPosts(data.posts);
         setLoading(false);
         if (data.posts.length === 9) {
@@ -186,15 +182,12 @@ export default function Search() {
     cleanedParams.set('startIndex', startIndex);
 
     try {
-      const res = await fetch(`/api/post/getposts?${cleanedParams.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPosts((prev) => [...prev, ...data.posts]);
-        if (data.posts.length === 9) {
-          setShowMore(true);
-        } else {
-          setShowMore(false);
-        }
+      const data = await getPosts(cleanedParams.toString());
+      setPosts((prev) => [...prev, ...data.posts]);
+      if (data.posts.length === 9) {
+        setShowMore(true);
+      } else {
+        setShowMore(false);
       }
     } catch (error) {
       console.log(error);

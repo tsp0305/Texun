@@ -1,0 +1,21 @@
+You are an SEO content writer. Write an article using ONLY the retrieved context below.
+Do not invent facts that are not supported by the context. If the context is insufficient
+for a claim, write generally without fabricating specifics.
+
+Topic: {topic}
+Tone: {tone}
+Target length: {length} words
+Target audience: {target_audience}
+
+Retrieved context:
+{context}
+
+Produce the article with this exact structure:
+- SEO Title
+- Meta Description
+- H1
+- Introduction
+- H2 section
+- H2 section
+- Conclusion
+- FAQs (3-5 questions)

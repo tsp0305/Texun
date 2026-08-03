@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { getPosts, updatePost } from '../api';
 
 export default function UpdatePost() {
   const [file, setFile] = useState(null);
@@ -70,24 +71,17 @@ export default function UpdatePost() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await fetch(`/api/post/getposts?postId=${postId}`);
-        const data = await res.json();
-        if (!res.ok) {
-          console.log(data.message);
-          setPublishError(data.message);
-          return;
-        }
-        if (res.ok) {
-          setPublishError(null);
-          const post = data.posts[0];
-          setFormData(post);
+        const data = await getPosts(`postId=${postId}`);
+        setPublishError(null);
+        const post = data.posts[0];
+        setFormData(post);
 
-          // Set selected category and subcategory
-          setSelectedCategory(post.product || '');
-          setSelectedSubCategory(post.category || '');
-        }
+        // Set selected category and subcategory
+        setSelectedCategory(post.product || '');
+        setSelectedSubCategory(post.category || '');
       } catch (error) {
         console.log(error.message);
+        setPublishError(error.message);
       }
     };
 
@@ -149,25 +143,11 @@ export default function UpdatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/post/updatepost/${formData._id}/${currentUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setPublishError(data.message);
-        return;
-      }
-
-      if (res.ok) {
-        setPublishError(null);
-        navigate(`/post/${data.slug}`);
-      }
+      const data = await updatePost(formData._id, currentUser._id, formData);
+      setPublishError(null);
+      navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError('Something went wrong');
+      setPublishError(error.message || 'Something went wrong');
     }
   };
 

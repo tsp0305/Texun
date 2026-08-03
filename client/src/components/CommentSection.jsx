@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Comment from './Comment';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import { createComment, getPostComments, likeComment, deleteComment } from '../api';
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,41 +20,29 @@ export default function CommentSection({ postId }) {
       return;
     }
     try {
-      const res = await fetch('/api/comment/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: comment,
-          postId,
-          userId: currentUser._id,
-        }),
+      const data = await createComment({
+        content: comment,
+        postId,
+        userId: currentUser._id,
       });
-      const data = await res.json();
-      if (res.ok) {
-        setComment('');
-        setCommentError(null);
-        setComments([data, ...comments]);
-      }
+      setComment('');
+      setCommentError(null);
+      setComments([data, ...comments]);
     } catch (error) {
       setCommentError(error.message);
     }
   };
 
   useEffect(() => {
-    const getComments = async () => {
+    const loadComments = async () => {
       try {
-        const res = await fetch(`/api/comment/getPostComments/${postId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setComments(data);
-        }
+        const data = await getPostComments(postId);
+        setComments(data);
       } catch (error) {
         console.log(error.message);
       }
     };
-    getComments();
+    loadComments();
   }, [postId]);
 
   const handleLike = async (commentId) => {
@@ -62,23 +51,18 @@ export default function CommentSection({ postId }) {
         navigate('/sign-in');
         return;
       }
-      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
-        method: 'PUT',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setComments(
-          comments.map((comment) =>
-            comment._id === commentId
-              ? {
-                  ...comment,
-                  likes: data.likes,
-                  numberOfLikes: data.likes.length,
-                }
-              : comment
-          )
-        );
-      }
+      const data = await likeComment(commentId);
+      setComments(
+        comments.map((comment) =>
+          comment._id === commentId
+            ? {
+                ...comment,
+                likes: data.likes,
+                numberOfLikes: data.likes.length,
+              }
+            : comment
+        )
+      );
     } catch (error) {
       console.log(error.message);
     }
@@ -99,13 +83,8 @@ export default function CommentSection({ postId }) {
         navigate('/sign-in');
         return;
       }
-      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setComments(comments.filter((comment) => comment._id !== commentId));
-      }
+      await deleteComment(commentId);
+      setComments(comments.filter((comment) => comment._id !== commentId));
     } catch (error) {
       console.log(error.message);
     }

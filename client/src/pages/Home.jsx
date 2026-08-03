@@ -2,15 +2,19 @@ import { Link } from 'react-router-dom';
 import CallToAction from '../components/CallToAction';
 import { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
+import { getPosts } from '../api';
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const res = await fetch('/api/post/getposts?limit=6');
-      const data = await res.json();
-      setPosts(data.posts);
+      try {
+        const data = await getPosts('limit=6');
+        setPosts(data.posts);
+      } catch (error) {
+        console.error(error.message || 'Error fetching posts');
+      }
     };
     fetchPosts();
   }, []);

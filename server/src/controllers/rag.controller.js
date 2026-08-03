@@ -1,9 +1,13 @@
-const { generateBlogContent } = require('../services/rag/rag.service');
+const { generateArticleViaAgent } = require('../services/pythonAgent.service');
+const { getCurrentFile, clearCurrentFile } = require('../services/uploadSession.service');
+const { deleteFile } = require('../services/pdf/pdf.service');
 
 /**
- * Handles requests to generate a blog post using the RAG pipeline.
+ * Forwards content generation to the Python workflow while preserving the frontend contract.
  */
 exports.generateBlog = async (req, res) => {
+    const filePath = getCurrentFile();
+
     try {
         const { topic, articleLength, customPrompt } = req.body;
         
@@ -13,33 +17,40 @@ exports.generateBlog = async (req, res) => {
                 message: 'Please provide a topic for the blog post.' 
             });
         }
+
+        if (!filePath) {
+            return res.status(404).json({
+                success: false,
+                message: 'No PDF has been uploaded yet. Upload a source PDF before generating.',
+            });
+        }
         
-        // Generate the blog content using RAG service
-        const blogContent = await generateBlogContent(topic, articleLength, customPrompt);
+        const promptText = customPrompt && customPrompt.trim().length > 0
+            ? customPrompt.trim()
+            : `Write an SEO article about ${topic}${articleLength ? ` at approximately ${articleLength} words` : ''}.`;
+
+        const result = await generateArticleViaAgent(filePath, promptText);
         
         return res.status(200).json({
             success: true,
             data: {
                 topic,
-                content: blogContent
+                content: result.article
             }
         });
         
     } catch (error) {
         console.error('Error in RAG generate controller:', error);
         
-        // Check for specific error thrown when vector store is empty
-        if (error.message.includes('No context found')) {
-            return res.status(404).json({
-                success: false,
-                message: error.message
-            });
-        }
-        
         return res.status(500).json({ 
             success: false, 
             message: 'An error occurred while generating the blog post.',
             error: error.message 
         });
+    } finally {
+        if (filePath) {
+            deleteFile(filePath);
+            clearCurrentFile();
+        }
     }
 };

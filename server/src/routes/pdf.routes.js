@@ -42,4 +42,7 @@ const upload = multer({
 // POST /api/pdf/upload
 router.post('/upload', upload.single('pdf'), pdfController.uploadPDF);
 
+// POST /api/pdf/clear - clears the pending upload before a fresh generation flow
+router.post('/clear', pdfController.clearStore);
+
 module.exports = router;

@@ -4,6 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import './darkMode.css';
+import { createPost, uploadPdfSource, generateRagContent } from '../api';
 
 export default function CreatePost() {
   const [file, setFile] = useState(null);
@@ -79,22 +80,10 @@ export default function CreatePost() {
     }
 
     try {
-      const res = await fetch('/api/post/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPublishError(data.message || 'Failed to publish post.');
-        return;
-      }
-
+      const data = await createPost(payload);
       navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError('Something went wrong.');
+      setPublishError(error.message || 'Something went wrong.');
     }
   };
 
@@ -143,20 +132,10 @@ export default function CreatePost() {
     formData.append('pdf', pdfFile);
 
     try {
-      const res = await fetch('http://localhost:5000/api/pdf/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPdfUploadMessage({ type: 'failure', text: data.message || 'Failed to upload PDF.' });
-      } else {
-        setPdfUploadMessage({ type: 'success', text: 'PDF successfully processed and indexed!' });
-      }
+      const data = await uploadPdfSource(formData);
+      setPdfUploadMessage({ type: 'success', text: 'PDF successfully processed and indexed!' });
     } catch (error) {
-      setPdfUploadMessage({ type: 'failure', text: 'Server error while uploading PDF.' });
+      setPdfUploadMessage({ type: 'failure', text: error.message || 'Server error while uploading PDF.' });
     } finally {
       setIsUploadingPdf(false);
     }
@@ -172,29 +151,18 @@ export default function CreatePost() {
     setAiGenerateError(null);
 
     try {
-      const res = await fetch('http://localhost:5000/api/rag/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          topic: aiTopic,
-          articleLength: aiArticleLength,
-          customPrompt: aiCustomPrompt
-        }),
+      const data = await generateRagContent({ 
+        topic: aiTopic,
+        articleLength: aiArticleLength,
+        customPrompt: aiCustomPrompt
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setAiGenerateError(data.message || 'Failed to generate content.');
-      } else {
-        // Populate ReactQuill and Title
-        handleInputChange('content', data.data.content);
-        if (!formData.title) {
-          handleInputChange('title', aiTopic);
-        }
+      // Populate ReactQuill and Title
+      handleInputChange('content', data.data.content);
+      if (!formData.title) {
+        handleInputChange('title', aiTopic);
       }
     } catch (error) {
-      setAiGenerateError('Server error while generating content.');
+      setAiGenerateError(error.message || 'Server error while generating content.');
     } finally {
       setIsGeneratingContent(false);
     }

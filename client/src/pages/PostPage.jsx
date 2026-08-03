@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import CallToAction from '../components/CallToAction';
 import CommentSection from '../components/CommentSection';
 import PostCard from '../components/PostCard';
+import { getPosts } from '../api';
 
 export default function PostPage() {
   const { postSlug } = useParams();
@@ -24,15 +25,7 @@ export default function PostPage() {
         setLoading(true);
         setError(false);
 
-        const res = await fetch(
-          `/api/post/getposts?slug=${encodeURIComponent(postSlug)}`
-        );
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to fetch post');
-        }
-
+        const data = await getPosts(`slug=${encodeURIComponent(postSlug)}`);
         setPost(data.posts?.[0] || null);
       } catch (error) {
         setError(true);
@@ -47,12 +40,8 @@ export default function PostPage() {
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const res = await fetch('/api/post/getposts?limit=3');
-        const data = await res.json();
-
-        if (res.ok) {
-          setRecentPosts(data.posts || []);
-        }
+        const data = await getPosts('limit=3');
+        setRecentPosts(data.posts || []);
       } catch (error) {
         console.error(error.message);
       }

@@ -57,13 +57,15 @@ export const signin = async (req, res, next) => {
     );
 
     const { password: pass, ...rest } = validUser._doc;
+    const secure = process.env.NODE_ENV === 'production';
+    const sameSite = secure ? 'strict' : 'lax';
 
     res
       .status(200)
       .cookie('access_token', token, {
         httpOnly: true,
-        secure: true, 
-        sameSite: "strict",
+        secure,
+        sameSite,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(rest);
@@ -83,12 +85,14 @@ export const google = async (req, res, next) => {
         {expiresIn:'7d'}
       );
       const { password, ...rest } = user._doc;
+      const secure = process.env.NODE_ENV === 'production';
+      const sameSite = secure ? 'strict' : 'lax';
       res
         .status(200)
         .cookie('access_token', token, {
           httpOnly: true,
-          secure: true, 
-          sameSite: "strict",
+          secure,
+          sameSite,
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .json(rest);
@@ -112,14 +116,15 @@ export const google = async (req, res, next) => {
         {expiresIn:'7d'}
       );
       const { password, ...rest } = newUser._doc;
+      const secure = process.env.NODE_ENV === 'production';
+      const sameSite = secure ? 'strict' : 'lax';
       res
         .status(200)
         .cookie('access_token', token, {
           httpOnly: true,
-           httpOnly: true,
-           secure: true, 
-           sameSite: "strict",
-           maxAge: 7 * 24 * 60 * 60 * 1000,
+          secure,
+          sameSite,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .json(rest);
     }

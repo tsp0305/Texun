@@ -10,22 +10,9 @@ export default function FooterCom() {
         <div className="flex flex-wrap justify-between items-center sm:flex-row gap-4">
           {/* Logo Section */}
           <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="p-1 bg-slate-100 dark:bg-slate-900 rounded group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/50 transition-colors duration-200">
-                <svg
-                  className="w-4 h-4 text-indigo-600 dark:text-indigo-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="font-bold text-base tracking-wider text-slate-800 dark:text-slate-100 font-sans">
-                TEX<span className="text-indigo-600 dark:text-indigo-400">UN</span>
+            <Link to="/" className="flex items-center gap-2 group -ml-1 sm:-ml-2">
+              <span className="font-semibold text-sm tracking-[0.25em] text-slate-800 dark:text-slate-100">
+                TEX <span className="text-indigo-600 dark:text-indigo-400">∞</span> <span className="text-slate-700 dark:text-slate-300">UN</span>
               </span>
             </Link>
           </div>
@@ -60,7 +47,7 @@ export default function FooterCom() {
         <div className="flex justify-between items-center flex-wrap gap-2 text-xs">
           <Footer.Copyright
             href="#"
-            by="TEXUN. All rights reserved."
+            by="TEX ∞ UN. All rights reserved."
             year={new Date().getFullYear()}
             className="text-slate-400 dark:text-slate-500"
           />
